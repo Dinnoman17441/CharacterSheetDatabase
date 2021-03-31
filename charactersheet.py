@@ -1,7 +1,8 @@
-from flask import Flask, g, render_template, request, redirect
+from flask import Flask, g, render_template, request, redirect, session, url_for, escape
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = "1234567890qwertyuiopasdfghjklzxcvbnmokayherewego121234asdeRTFeDRAtAtygvdtygyatg7615287yGAsdTGAo7821g273gh87td9wyd678gyGFUAYdgouy9"
 DATABASE = 'charactersheets.db'
 
 def get_db():
@@ -16,13 +17,47 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
+@app.route('/login', methods = ['GET', 'POST'])
+def login():
+   if request.method == 'POST':
+        session['username'] = request.form['username']
+        return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+   # remove the username from the session if it is there
+   session.pop('username', None)
+   return redirect('/login')
+
 @app.route('/')
 def contents():
     cursor = get_db().cursor()
-    sql = "SELECT * FROM mainContents"
+    sql = "SELECT * FROM sheet"
     cursor.execute(sql)
     sheets = cursor.fetchall()
     return render_template('contents.html', sheets=sheets)
+
+@app.route('/add', methods=["GET", "POST"])
+def add():
+    if request.method == "POST":
+        cursor = get_db().cursor()
+        new_name = request.form["character_name"]
+        new_class = request.form["character_class"]
+        new_race = request.form["character_race"]
+        sql = "INSERT INTO sheet(CharacterName, Class, Race) VALUES (?, ?, ?)"
+        cursor.execute(sql,(new_name, new_class, new_race))
+        get_db().commit()
+    return render_template('newsheet.html')
+
+@app.route("/delete", methods=["GET", "POST"])
+def delete():
+    if request.method == "POST":
+        cursor = get_db().cursor()
+        id = int(request.form["character_id"])
+        sql = "DELETE FROM sheet WHERE id = ?"
+        cursor.execute(sql, (id, ))
+        get_db().commit()
+    return redirect("/")
 
 if __name__ == "__main__":
     app.run(debug=True)
