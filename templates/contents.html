@@ -15,6 +15,7 @@
             <th><b>Class</b></th>
             <th><b>Race</b></th>
             <th>Delete?</th>
+            <th>Edit?</th>
         </tr>
         {% for item in sheets %}
             <tr>
@@ -24,8 +25,13 @@
                 <th>{{ item[6] }}</th>
                 <td>
                     <form action="/delete" method="POST">
-                        <input type="hidden" name="character_id" value="{{ item[0] }}">
+                        <input type="hidden" name="c_id" value="{{ item[0] }}">
                         <input type="submit" value="Delete">
+                    </form>
+                </td>
+                <td>
+                    <form action="/edit/{{ item[0] }}" method="GET">
+                        <input type ="submit" value="edit">
                     </form>
                 </td>
             </tr>

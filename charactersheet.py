@@ -53,11 +53,26 @@ def add():
 def delete():
     if request.method == "POST":
         cursor = get_db().cursor()
-        id = int(request.form["character_id"])
+        id = int(request.form["c_id"])
         sql = "DELETE FROM sheet WHERE id = ?"
         cursor.execute(sql, (id, ))
         get_db().commit()
     return redirect("/")
+
+@app.route("/edit/<int:id>", methods=["GET", "POST", "UPDATE"])
+def edit(id):
+    if request.method == "POST":
+        cursor = get_db().cursor()
+        edit_name = request.form["edit_character_name"]
+        edit_class = request.form["edit_character_class"]
+        edit_race = request.form["edit_character_race"]
+        sql = '''UPDATE sheet 
+        SET CharacterName = ?, Class = ?, Race = ?
+        WHERE ID = ?'''
+        cursor.execute(sql, (edit_name, edit_class, edit_race, id))
+        get_db().commit()
+        return redirect("/")
+    return render_template('editsheet.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
